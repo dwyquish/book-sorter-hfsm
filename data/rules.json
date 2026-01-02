@@ -1,0 +1,30 @@
+{
+  "start_state": "START",
+  "states": {
+    "START": {
+      "transitions": {
+        "introduction": "INTRO_SEEN",
+        "fundamentals": "INTRO_SEEN",
+        "python": "CS_ACCEPT",
+        "algorithms": "CS_ACCEPT"
+      }
+    },
+    "INTRO_SEEN": {
+      "transitions": {
+        "to": "PREP_SEEN",
+        "of": "PREP_SEEN"
+      }
+    },
+    "PREP_SEEN": {
+      "transitions": {
+        "algorithms": "CS_ACCEPT",
+        "computing": "CS_ACCEPT",
+        "automata": "CS_ACCEPT"
+      }
+    },
+    "CS_ACCEPT": {
+      "type": "accept",
+      "category": "Computer Science"
+    }
+  }
+}
