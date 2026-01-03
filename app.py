@@ -1,28 +1,67 @@
 import streamlit as st
 import pandas as pd
 import json
+from src.hfsm_engine import HFSMEngine
 
 # Page Config
 st.set_page_config(page_title="HFSM Book Sorter", layout="wide")
 
-st.title("📚 HFSM-Based Digital Book Sorter")
-st.markdown("### Automata & Language Theory Group 9")
+st.title("HFSM-Based Digital Book Sorter")
+st.markdown("### Automata & Language Theory — Group 9")
 
-# Sidebar for Rules
+# -----------------------------------
+# Sidebar: Rule Configuration
+# -----------------------------------
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.header("Configuration")
     rule_file = st.file_uploader("Upload Rules (JSON)", type=["json"])
-    
-    # Load default rules if nothing uploaded
-    if not rule_file:
-        with open('data/rules.json') as f:
-            rules = json.load(f)
-        st.success("Default rules loaded.")
-    else:
+
+    if rule_file:
         rules = json.load(rule_file)
         st.success("Custom rules loaded!")
+    else:
+        with open("data/rules.json", "r", encoding="utf-8") as f:
+            rules = json.load(f)
+        st.success("Default rules loaded.")
 
-# Main Area
+# Initialize HFSM Engine
+engine = HFSMEngine(rules)
+
+# -----------------------------------
+# Main Layout
+# -----------------------------------
+import streamlit as st
+import pandas as pd
+import json
+from src.hfsm_engine import HFSMEngine
+
+# Page Config
+st.set_page_config(page_title="HFSM Book Sorter", layout="wide")
+
+st.title("HFSM-Based Digital Book Sorter")
+st.markdown("### Automata & Language Theory — Group 9")
+
+# -----------------------------------
+# Sidebar: Rule Configuration
+# -----------------------------------
+with st.sidebar:
+    st.header("Configuration")
+    rule_file = st.file_uploader("Upload Rules (JSON)", type=["json"])
+
+    if rule_file:
+        rules = json.load(rule_file)
+        st.success("Custom rules loaded!")
+    else:
+        with open("data/rules.json", "r", encoding="utf-8") as f:
+            rules = json.load(f)
+        st.success("Default rules loaded.")
+
+# Initialize HFSM Engine
+engine = HFSMEngine(rules)
+
+# -----------------------------------
+# Main Layout
+# -----------------------------------
 col1, col2 = st.columns([1, 2])
 
 with col1:
@@ -31,28 +70,45 @@ with col1:
 
 if data_file:
     df = pd.read_csv(data_file)
-    
+
+    # Safety check (defense-friendly)
+    if "Title" not in df.columns:
+        st.error("CSV must contain a 'Title' column.")
+        st.stop()
+
     with col2:
         st.subheader("2. Results")
-        if st.button("🚀 Run Classification"):
-            # -----------------------------------------------
-            # TODO: CONNECT THE HFSM ENGINE HERE
-            # For now, we vibe code a dummy result
-            # -----------------------------------------------
-            
-            st.write("Processing with HFSM...")
-            
-            # Placeholder logic (Replace this with real engine later)
-            results = []
-            for title in df['Title']:
-                if "Automata" in title or "Python" in title:
-                    results.append("Computer Science")
-                else:
-                    results.append("Unknown/Review")
-            
-            df['Category'] = results
+
+        if st.button("Run Classification"):
+            st.info("Processing with HFSM...")
+
+            categories = []
+            traces = []
+
+            for title in df["Title"]:
+                result = engine.classify(title)
+                categories.append(result["category"])
+                traces.append(result["trace"])
+
+            df["Category"] = categories
+            df["Audit Trace"] = traces
+
             st.dataframe(df, use_container_width=True)
-            
-            # Explainer / Audit Log (Crucial for your paper)
+            st.success("Classification complete!")
+            # Downloadable Results
+            csv = df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label="📥 Download Results as CSV",
+                data=csv,
+                file_name="classified_books.csv",
+                mime="text/csv",
+            )
+
+            # Audit Log (Critical for Defense)
             with st.expander("See Audit Logs (State Transitions)"):
-                st.code("START -> 'introduction' -> INTRO_SEEN -> 'to' -> PREP_SEEN -> 'automata' -> ACCEPT")
+                st.markdown("Example DFA Execution Path:")
+                if traces:
+                    st.code(traces[0])
+                st.markdown("Each title's audit trace shows the sequence of states traversed during classification.")
+else:
+    st.info("Please upload a CSV file containing the book list.")
