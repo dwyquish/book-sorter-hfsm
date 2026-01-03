@@ -1,3 +1,7 @@
+import sys
+# Add the src folder to system path so we can import modules from it
+sys.path.append('src') 
+from hfsm_engine import HFSMEngine
 import streamlit as st
 import pandas as pd
 import json
@@ -61,5 +65,56 @@ with col2:
         elif df is None:
             st.error("Cannot run: No data loaded.")
         else:
-            st.warning("⚠️ Engine not connected yet! (Waiting for Person A)")
-            # This is where we will hook up Person A's code tomorrow.
+            st.info("⏳ Engine running... Processing tokens...")
+            
+            # --- THE INTEGRATION POINT ---
+            
+            # 1. Initialize the Engine with the loaded rules
+            engine = HFSMEngine(rules_data)
+            
+            # 2. Process every row
+            results = []
+            traces = []
+            
+            # Create a progress bar
+            progress_bar = st.progress(0)
+            total_rows = len(df)
+            
+            for index, row in df.iterrows():
+                # Extract title (handle missing columns gracefully)
+                title = str(row.get('Title', ''))
+                
+                # RUN THE CLASSIFICATION
+                output = engine.classify(title)
+                
+                results.append(output['category'])
+                traces.append(output['trace'])
+                
+                # Update progress
+                progress_bar.progress((index + 1) / total_rows)
+            
+            # 3. Save results back to DataFrame
+            df['Assigned Category'] = results
+            df['Audit Trace'] = traces
+            
+            st.success("✅ Classification Complete!")
+            
+            # 4. Display Results
+            st.dataframe(df, use_container_width=True)
+            
+            # 5. Download Button
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                "📥 Download Results CSV",
+                csv,
+                "classified_books.csv",
+                "text/csv",
+                key='download-csv'
+            )
+            
+            # 6. Audit Log Inspector
+            st.markdown("### 🔍 Audit Log Inspector")
+            selected_row = st.selectbox("Select a book to inspect its path:", df['Title'])
+            if selected_row:
+                row_data = df[df['Title'] == selected_row].iloc[0]
+                st.code(f"Title: {row_data['Title']}\nResult: {row_data['Assigned Category']}\n\nPath:\n{row_data['Audit Trace']}")
