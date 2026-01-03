@@ -4,8 +4,12 @@
     "s0": {
       "transitions": {
         "introduction": "s_intro",
+        "fundamentals": "s_intro",
         "python": "s_cs_root",
-        "history": "s_hist_root"
+        "algorithms": "s_cs_root",
+        "history": "s_hist_root",
+        "cooking": "s_cook_root",
+        "recipes": "s_cook_root"
       }
     },
     "s_intro": {
@@ -17,21 +21,42 @@
     "s_prep": {
       "transitions": {
         "algorithms": "s_cs_accept",
-        "rome": "s_hist_accept"
+        "python": "s_cs_accept",
+        "rome": "s_hist_accept",
+        "cooking": "s_cook_accept",
+        "science": "s_hist_sci_mix"
       }
     },
     "s_cs_root": {
       "type": "accept",
       "category": "Computer Science",
       "transitions": {
-        "programming": "s_cs_accept"
+        "programming": "s_cs_accept",
+        "handbook": "s_cs_accept",
+        "guide": "s_cs_accept"
       }
     },
     "s_hist_root": {
       "type": "accept",
       "category": "History",
       "transitions": {
-        "war": "s_hist_accept"
+        "of": "s_hist_root",
+        "the": "s_hist_root",
+        "and": "s_hist_root",
+        "war": "s_hist_accept",
+        "civilization": "s_hist_accept",
+        "rome": "s_hist_accept",
+        "science": "s_hist_sci_mix",
+        "computing": "s_hist_sci_mix"
+      }
+    },
+    "s_cook_root": {
+      "type": "accept",
+      "category": "Culinary Arts",
+      "transitions": {
+        "for": "s_cook_root",
+        "guide": "s_cook_accept",
+        "masterclass": "s_cook_accept"
       }
     },
     "s_cs_accept": {
@@ -41,6 +66,14 @@
     "s_hist_accept": {
       "type": "accept",
       "category": "History"
+    },
+    "s_cook_accept": {
+      "type": "accept",
+      "category": "Culinary Arts"
+    },
+    "s_hist_sci_mix": {
+      "type": "accept",
+      "category": "History of Science (Interdisciplinary)"
     }
   }
 }

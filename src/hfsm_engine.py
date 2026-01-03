@@ -49,22 +49,18 @@ class HFSMEngine:
             # Check transition
             if word in transitions:
                 next_state = transitions[word]
-                # Log the math symbol for the Professor (δ = delta)
+                # Log the math symbol
                 trace.append(f"δ({current_state}, '{word}') → {next_state}")
                 current_state = next_state
                 
-                # Check if we hit an ACCEPT state immediately
-                if self.states.get(current_state, {}).get("type") == "accept":
-                    return {
-                        "category": self.states[current_state].get("category", "Unknown"),
-                        "trace": " -> ".join(trace),
-                        "confidence": 1.0
-                    }
+                # --- CHANGE: WE REMOVED THE IMMEDIATE RETURN HERE ---
+                # We want the engine to keep going to find the "Longest Match"
             else:
-                # No transition found, stay or ignore
+                # No transition found, ignore this word and continue loop
                 pass
 
         # 2. End of String Check
+        # Only NOW do we check if we landed on an accept state
         final_state_def = self.states.get(current_state, {})
         
         if final_state_def.get("type") == "accept":
