@@ -1,55 +1,46 @@
 {
-  "START": {
-    "transitions": {
-      "introduction": "INTRO_STATE",
-      "fundamentals": "INTRO_STATE",
-      "history": "HIST_ROOT",
-      "python": "CS_ROOT",
-      "java": "CS_ROOT",
-      "cooking": "COOK_ROOT",
-      "recipes": "COOK_ROOT"
+  "start_state": "s0",
+  "states": {
+    "s0": {
+      "transitions": {
+        "introduction": "s_intro",
+        "python": "s_cs_root",
+        "history": "s_hist_root"
+      }
+    },
+    "s_intro": {
+      "transitions": {
+        "to": "s_prep",
+        "of": "s_prep"
+      }
+    },
+    "s_prep": {
+      "transitions": {
+        "algorithms": "s_cs_accept",
+        "rome": "s_hist_accept"
+      }
+    },
+    "s_cs_root": {
+      "type": "accept",
+      "category": "Computer Science",
+      "transitions": {
+        "programming": "s_cs_accept"
+      }
+    },
+    "s_hist_root": {
+      "type": "accept",
+      "category": "History",
+      "transitions": {
+        "war": "s_hist_accept"
+      }
+    },
+    "s_cs_accept": {
+      "type": "accept",
+      "category": "Computer Science"
+    },
+    "s_hist_accept": {
+      "type": "accept",
+      "category": "History"
     }
-  },
-  "INTRO_STATE": {
-    "transitions": {
-      "to": "PREP_STATE",
-      "of": "PREP_STATE"
-    }
-  },
-  "PREP_STATE": {
-    "transitions": {
-      "algorithms": "CS_ACCEPT",
-      "cooking": "COOK_ACCEPT",
-      "rome": "HIST_ACCEPT"
-    }
-  },
-  "CS_ROOT": {
-    "transitions": {
-      "programming": "CS_ACCEPT",
-      "handbook": "CS_ACCEPT"
-    }
-  },
-  "HIST_ROOT": {
-    "transitions": {
-      "war": "HIST_ACCEPT",
-      "civilization": "HIST_ACCEPT"
-    }
-  },
-  "COOK_ROOT": {
-    "transitions": {
-      "guide": "COOK_ACCEPT"
-    }
-  },
-  "CS_ACCEPT": {
-    "type": "accept",
-    "category": "Computer Science"
-  },
-  "HIST_ACCEPT": {
-    "type": "accept",
-    "category": "History"
-  },
-  "COOK_ACCEPT": {
-    "type": "accept",
-    "category": "Culinary Arts"
   }
 }
