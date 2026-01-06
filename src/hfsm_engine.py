@@ -1,77 +1,64 @@
 import re
 
 class HFSMEngine:
-    """
-    Deterministic Finite Automaton (DFA) engine operating over token input.
-    """
 
     def __init__(self, rules):
-        # 1. Validation Logic
-        if not rules:
-            raise ValueError("Rules cannot be empty")
-        
-        # Check for the NEW structure (Person A's format)
-        if "start_state" not in rules or "states" not in rules:
-            # Fallback check: Did we use the OLD structure?
-            if "START" in rules:
-                raise ValueError("Old rule format detected! Please update rules.json to use 'start_state' and 'states'.")
-            raise ValueError("Invalid rules: must contain 'start_state' and 'states'")
-
         self.rules = rules
-        self.start_state = rules["start_state"]
-        self.states = rules["states"]
+        self.root = rules["states"][rules["start_state"]]
 
     def tokenize(self, text):
-        """
-        Converts text into a clean list of words.
-        Ex: "Intro to Python!" -> ['intro', 'to', 'python']
-        """
         if not text:
             return []
-        # Lowercase and remove anything that isn't a letter or number
-        clean_text = re.sub(r'[^a-z0-9\s]', '', str(text).lower())
-        return clean_text.split()
+        clean = re.sub(r'[^a-z0-9\s]', '', text.lower())
+        return clean.split()
 
-    def classify(self, title):
-        """
-        Runs the Finite State Machine on a book title.
-        """
-        tokens = self.tokenize(title)
-        current_state = self.start_state
-        trace = [current_state]
+    def classify(self, text):
+        tokens = self.tokenize(text)
+        state_stack = []
+        trace = []
 
-        # 1. Traversal Loop
-        for word in tokens:
-            # Get definition of current state
-            state_def = self.states.get(current_state, {})
-            transitions = state_def.get("transitions", {})
-            
-            # Check transition
-            if word in transitions:
-                next_state = transitions[word]
-                # Log the math symbol
-                trace.append(f"δ({current_state}, '{word}') → {next_state}")
-                current_state = next_state
-                
-                # --- CHANGE: WE REMOVED THE IMMEDIATE RETURN HERE ---
-                # We want the engine to keep going to find the "Longest Match"
-            else:
-                # No transition found, ignore this word and continue loop
-                pass
+        # Enter root
+        current = self.root
+        state_stack.append("root")
 
-        # 2. End of String Check
-        # Only NOW do we check if we landed on an accept state
-        final_state_def = self.states.get(current_state, {})
-        
-        if final_state_def.get("type") == "accept":
-            return {
-                "category": final_state_def.get("category", "Unknown"),
-                "trace": " -> ".join(trace),
-                "confidence": 1.0
-            }
-        else:
-            return {
-                "category": "Unknown / Review",
-                "trace": " -> ".join(trace) + " -> (Stuck/Rejected)",
-                "confidence": 0.0
-            }
+        # Enter initial state
+        current = current["states"][current["initial"]]
+        state_stack.append(current)
+
+        for token in tokens:
+            transitioned = self._try_transition(current, token, state_stack, trace)
+            if transitioned:
+                current = transitioned
+
+        # Find deepest accepting state
+        for state in reversed(state_stack):
+            if isinstance(state, dict) and state.get("type") == "accept":
+                return {
+                    "category": state.get("category"),
+                    "trace": " → ".join(trace),
+                    "confidence": 1.0
+                }
+
+        return {
+            "category": "Unknown / Review",
+            "trace": " → ".join(trace),
+            "confidence": 0.0
+        }
+
+    def _try_transition(self, state, token, stack, trace):
+        # Local transition
+        if "transitions" in state and token in state["transitions"]:
+            next_name = state["transitions"][token]
+            parent = stack[-2] if len(stack) > 1 else None
+
+            if parent and "states" in parent:
+                next_state = parent["states"][next_name]
+                stack.append(next_state)
+                trace.append(f"δ({next_name}, '{token}')")
+                return next_state
+
+        # Inherit transition from parent
+        if len(stack) > 1:
+            return self._try_transition(stack[-2], token, stack, trace)
+
+        return None
