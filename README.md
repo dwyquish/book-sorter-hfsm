@@ -6,14 +6,8 @@
 
 An automated classification engine that uses **Hierarchical Finite State Machines (HFSM)** to categorize digital library records based on metadata patterns. This system is designed to provide transparent, deterministic, and auditable sorting for bibliographic data.
 
-## 👥 Group 9 - Development Team
-* **Kyle Desmond P. Co**
-* **Marvin C. Barrios**
-* **Ken Calvin S. Satorre**
-* **Earl Andrei D. Fidel**
-
 ## 📖 Project Overview
-[cite_start]Modern digital libraries struggle with inconsistent metadata[cite: 10]. This project implements a **Finite-State Automata** approach to classification, prioritizing **determinism** and **explainability** over black-box machine learning models.
+Modern digital libraries struggle with inconsistent metadata. This project implements a **Finite-State Automata** approach to classification, prioritizing **determinism** and **explainability** over black-box machine learning models.
 
 The system ingests raw bibliographic data (Title, Keywords) and processes it through a token-based state machine to assign a category (e.g., *Computer Science*, *History*).
 
