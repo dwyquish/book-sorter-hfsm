@@ -13,7 +13,7 @@ class HFSMEngine:
         self.root = rules["states"][self.start_state]
 
     def tokenize(self, text):
-        """Convert text into lowercase words, remove non-alphanumeric characters."""
+        # Convert text into lowercase words, remove non-alphanumeric characters.
         if not text:
             return []
         clean = re.sub(r'[^a-z0-9\s]', '', str(text).lower())
@@ -67,14 +67,10 @@ class HFSMEngine:
             "confidence": confidence
         }
 
-    # -----------------------------
-    # Helper Methods
-    # -----------------------------
-
     def _enter_initial(self, state, name, stack):
-        """
-        Recursively enter initial states to reach the deepest starting state.
-        """
+        # ------------------------------
+        # Recursively enter initial states to reach the deepest starting state.
+        # ------------------------------
         path_trace = [name]
         while "initial" in state and "states" in state:
             init_name = state["initial"]

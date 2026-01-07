@@ -70,7 +70,8 @@
                 "war": "hist_specific",
                 "science": "hist_sci",
                 "empire": "hist_specific",
-                "civilization": "hist_specific"
+                "civilization": "hist_specific",
+                "python": "hist_specific"
               }
             },
             "hist_specific": {
