@@ -86,23 +86,9 @@
 
         "literature": {
           "type": "accept",
-          "category": "Literature",
-          "initial": "lit_general",
-          "states": {
-            "lit_general": {
-              "transitions": {
-                "harry": "lit_specific",
-                "potter": "lit_specific",
-                "blood": "lit_specific",
-                "meridian": "lit_specific",
-                "mockingbird": "lit_specific",
-                "kill": "lit_specific",
-                "gatsby": "lit_specific"
-              }
-          }
+          "category": "Literature"
         }
       }
     }
   }
-}
 }
