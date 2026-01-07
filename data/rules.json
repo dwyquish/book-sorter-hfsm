@@ -25,6 +25,7 @@
             "fiction": "literature",
             "harry": "literature",
             "house": "literature",
+            "leaves": "literature",
             "gatsby": "literature",
             "blood": "literature",
             "meridian": "literature",
@@ -90,26 +91,18 @@
           "states": {
             "lit_general": {
               "transitions": {
-                "harry": "lit_fantasy",
-                "potter": "lit_fantasy",
-                "blood": "lit_american",
-                "meridian": "lit_american",
-                "mockingbird": "lit_american",
-                "kill": "lit_american",
-                "gatsby": "lit_american"
+                "harry": "lit_specific",
+                "potter": "lit_specific",
+                "blood": "lit_specific",
+                "meridian": "lit_specific",
+                "mockingbird": "lit_specific",
+                "kill": "lit_specific",
+                "gatsby": "lit_specific"
               }
-            },
-            "lit_fantasy": {
-              "type": "accept",
-              "category": "Fantasy Literature"
-            },
-            "lit_american": {
-              "type": "accept",
-              "category": "American Literature"
-            }
           }
         }
       }
     }
   }
+}
 }
