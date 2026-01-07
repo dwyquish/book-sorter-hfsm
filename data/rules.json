@@ -16,13 +16,20 @@
 
             "history": "history",
             "rome": "history",
+            "roman": "history",
             "war": "history",
+            "empire": "history",
+            "civilization": "history",
 
             "novel": "literature",
             "fiction": "literature",
             "harry": "literature",
-            "leaves": "literature",
-            "gatsby": "literature"
+            "house": "literature",
+            "gatsby": "literature",
+            "blood": "literature",
+            "meridian": "literature",
+            "mockingbird": "literature",
+            "kill": "literature"
           }
         },
 
@@ -58,7 +65,11 @@
             "hist_general": {
               "transitions": {
                 "rome": "hist_specific",
-                "science": "hist_sci"
+                "roman": "hist_specific",
+                "war": "hist_specific",
+                "science": "hist_sci",
+                "empire": "hist_specific",
+                "civilization": "hist_specific"
               }
             },
             "hist_specific": {
@@ -79,14 +90,13 @@
           "states": {
             "lit_general": {
               "transitions": {
-                "fantasy": "lit_fantasy",
-                "magic": "lit_fantasy",
                 "harry": "lit_fantasy",
                 "potter": "lit_fantasy",
-
-                "american": "lit_american",
                 "blood": "lit_american",
-                "meridian": "lit_american"
+                "meridian": "lit_american",
+                "mockingbird": "lit_american",
+                "kill": "lit_american",
+                "gatsby": "lit_american"
               }
             },
             "lit_fantasy": {
