@@ -1,30 +1,95 @@
 {
-  "start_state": "START",
+  "start_state": "root",
   "states": {
-    "START": {
-      "transitions": {
-        "introduction": "INTRO_SEEN",
-        "fundamentals": "INTRO_SEEN",
-        "python": "CS_ACCEPT",
-        "algorithms": "CS_ACCEPT"
+    "root": {
+      "initial": "domain_select",
+      "states": {
+        "domain_select": {
+          "transitions": {
+            "python": "cs",
+            "algorithms": "cs",
+            "automata": "cs",
+            "programming": "cs",
+
+            "cooking": "culinary",
+            "baking": "culinary",
+
+            "history": "history",
+            "rome": "history",
+            "roman": "history",
+            "war": "history",
+            "empire": "history",
+            "civilization": "history",
+
+            "novel": "literature",
+            "fiction": "literature",
+            "harry": "literature",
+            "house": "literature",
+            "leaves": "literature",
+            "gatsby": "literature",
+            "blood": "literature",
+            "meridian": "literature",
+            "mockingbird": "literature",
+            "kill": "literature"
+          }
+        },
+
+        "cs": {
+          "type": "accept",
+          "category": "Computer Science",
+          "initial": "cs_general",
+          "states": {
+            "cs_general": {
+              "transitions": {
+                "python": "cs_specific",
+                "algorithms": "cs_specific",
+                "automata": "cs_specific"
+              }
+            },
+            "cs_specific": {
+              "type": "accept",
+              "category": "Computer Science"
+            }
+          }
+        },
+
+        "culinary": {
+          "type": "accept",
+          "category": "Culinary Arts"
+        },
+
+        "history": {
+          "type": "accept",
+          "category": "History",
+          "initial": "hist_general",
+          "states": {
+            "hist_general": {
+              "transitions": {
+                "rome": "hist_specific",
+                "roman": "hist_specific",
+                "war": "hist_specific",
+                "science": "hist_sci",
+                "empire": "hist_specific",
+                "civilization": "hist_specific",
+                "python": "hist_specific"
+              }
+            },
+            "hist_specific": {
+              "type": "accept",
+              "category": "History"
+            },
+            "hist_sci": {
+              "type": "accept",
+              "category": "History of Science"
+            }
+          }
+        },
+
+        "literature": {
+          "type": "accept",
+          "category": "Literature"
+        }
       }
-    },
-    "INTRO_SEEN": {
-      "transitions": {
-        "to": "PREP_SEEN",
-        "of": "PREP_SEEN"
-      }
-    },
-    "PREP_SEEN": {
-      "transitions": {
-        "algorithms": "CS_ACCEPT",
-        "computing": "CS_ACCEPT",
-        "automata": "CS_ACCEPT"
-      }
-    },
-    "CS_ACCEPT": {
-      "type": "accept",
-      "category": "Computer Science"
     }
   }
 }

@@ -1,58 +1,137 @@
 import streamlit as st
 import pandas as pd
 import json
+import os
+from src.hfsm_engine import HFSMEngine
 
-# Page Config
+# -----------------------------------
+# 1. Page Config
+# -----------------------------------
 st.set_page_config(page_title="HFSM Book Sorter", layout="wide")
 
-st.title("📚 HFSM-Based Digital Book Sorter")
-st.markdown("### Automata & Language Theory Group 9")
+st.title("HFSM-Based Digital Book Sorter")
+st.markdown("### Automata & Language Theory — Group 9")
 
-# Sidebar for Rules
+# -----------------------------------
+# 2. Sidebar: Rule Configuration
+# -----------------------------------
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.header("Configuration")
+    
     rule_file = st.file_uploader("Upload Rules (JSON)", type=["json"])
     
-    # Load default rules if nothing uploaded
-    if not rule_file:
-        with open('data/rules.json') as f:
-            rules = json.load(f)
-        st.success("Default rules loaded.")
+    rules = None
+    if rule_file:
+        try:
+            rules = json.load(rule_file)
+            st.success("✅ Custom rules loaded!")
+        except Exception as e:
+            st.error(f"Invalid JSON: {e}")
     else:
-        rules = json.load(rule_file)
-        st.success("Custom rules loaded!")
+        default_path = "data/rules.json"
+        if os.path.exists(default_path):
+            with open(default_path, "r", encoding="utf-8") as f:
+                rules = json.load(f)
+            st.success("✅ Default rules loaded.")
+        else:
+            st.warning("⚠️ No rules found. Please upload a JSON file.")
 
-# Main Area
+# Initialize Engine
+engine = None
+if rules:
+    try:
+        engine = HFSMEngine(rules)
+    except ValueError as e:
+        st.error(f"❌ Rule Validation Error: {e}")
+        st.stop()
+
+# -----------------------------------
+# 3. Main Layout
+# -----------------------------------
 col1, col2 = st.columns([1, 2])
 
 with col1:
     st.subheader("1. Upload Data")
     data_file = st.file_uploader("Upload Book List (CSV)", type=["csv"])
 
-if data_file:
-    df = pd.read_csv(data_file)
-    
-    with col2:
-        st.subheader("2. Results")
-        if st.button("🚀 Run Classification"):
-            # -----------------------------------------------
-            # TODO: CONNECT THE HFSM ENGINE HERE
-            # For now, we vibe code a dummy result
-            # -----------------------------------------------
+    if not data_file and os.path.exists("data/books.csv"):
+        st.info("ℹ️ Using default 'data/books.csv' for demo.")
+        df = pd.read_csv("data/books.csv")
+    elif data_file:
+        df = pd.read_csv(data_file)
+    else:
+        df = None
+
+# -----------------------------------
+# 4. Processing & State Management
+# -----------------------------------
+if df is not None:
+    # Check for required column
+    if "Title" not in df.columns:
+        st.error("❌ CSV must contain a 'Title' column.")
+    else:
+        with col1:
+            st.dataframe(df, height=150)
+
+        with col2:
+            st.subheader("2. Results")
             
-            st.write("Processing with HFSM...")
-            
-            # Placeholder logic (Replace this with real engine later)
-            results = []
-            for title in df['Title']:
-                if "Automata" in title or "Python" in title:
-                    results.append("Computer Science")
-                else:
-                    results.append("Unknown/Review")
-            
-            df['Category'] = results
-            st.dataframe(df, use_container_width=True)
-            
-            # Explainer / Audit Log (Crucial for your paper)
-            with st.expander("See Audit Logs (State Transitions)"):
-                st.code("START -> 'introduction' -> INTRO_SEEN -> 'to' -> PREP_SEEN -> 'automata' -> ACCEPT")
+            # THE FIX: We use session_state to remember that we already ran the tool
+            if "classified_df" not in st.session_state:
+                st.session_state.classified_df = None
+
+            run_btn = st.button("🚀 Run Classification", type="primary")
+
+            # Logic: If button clicked, process and SAVE to session state
+            if run_btn and engine:
+                st.info("⏳ Processing with HFSM...")
+                
+                categories = []
+                traces = []
+                progress_bar = st.progress(0)
+                
+                for i, title in enumerate(df["Title"]):
+                    result = engine.classify(str(title))
+                    categories.append(result["category"])
+                    traces.append(result["trace"])
+                    progress_bar.progress((i + 1) / len(df))
+                
+                df["Category"] = categories
+                df["Audit Trace"] = traces
+                
+                # SAVE RESULTS TO MEMORY
+                st.session_state.classified_df = df
+                st.success("✅ Classification complete!")
+
+            # Logic: If results exist in memory, show them (even if button isn't clicked right now)
+            if st.session_state.classified_df is not None:
+                result_df = st.session_state.classified_df
+                
+                st.dataframe(result_df, use_container_width=True)
+                
+                # Download
+                csv = result_df.to_csv(index=False).encode("utf-8")
+                st.download_button(
+                    label="📥 Download Results as CSV",
+                    data=csv,
+                    file_name="classified_books.csv",
+                    mime="text/csv",
+                )
+                
+                # -----------------------------------
+                # 5. Inspector (Now persists correctly)
+                # -----------------------------------
+                st.markdown("---")
+                st.subheader("🔍 State Transition Inspector")
+                
+                # Dropdown to select book
+                book_titles = result_df["Title"].tolist()
+                selected_book = st.selectbox("Select a book to trace:", book_titles)
+                
+                if selected_book:
+                    # Filter the dataframe to find the row
+                    row = result_df[result_df["Title"] == selected_book].iloc[0]
+                    
+                    st.info(f"**Final Category:** {row['Category']}")
+                    st.caption("Detailed State Path:")
+                    st.code(row['Audit Trace'], language="text")
